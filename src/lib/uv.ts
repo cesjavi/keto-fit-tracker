@@ -1,0 +1,5 @@
+export type UVHour={startAt:number;endAt:number;uv:number|null;isDay:boolean|null};
+export type UVForecast={timezone:string;fetchedAt:number;hours:UVHour[];sun:{rise:number|null;set:number|null}[]};
+export function uvLevel(uv:number){return uv<3?{name:'Bajo',color:'#5a9555'}:uv<6?{name:'Moderado',color:'#b18a12'}:uv<8?{name:'Alto',color:'#ce7622'}:uv<11?{name:'Muy alto',color:'#cc4945'}:{name:'Extremo',color:'#9352ab'}}
+export function zoneDate(timestamp:number,timezone:string){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(timestamp));return `${parts.find(p=>p.type==='year')?.value}-${parts.find(p=>p.type==='month')?.value}-${parts.find(p=>p.type==='day')?.value}`}
+export function daylight(hour:UVHour,forecast:UVForecast){const sun=forecast.sun.find(s=>s.rise!==null&&s.set!==null&&s.rise<hour.endAt&&s.set>hour.startAt);if(sun&&sun.rise!==null&&sun.set!==null)return {startAt:Math.max(hour.startAt,sun.rise),endAt:Math.min(hour.endAt,sun.set)};return hour.isDay===true?{startAt:hour.startAt,endAt:hour.endAt}:null}

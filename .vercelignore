@@ -1,0 +1,9 @@
+.env*
+.data
+.next
+node_modules
+.git
+*.log
+iniciar.ps1
+detener-base.ps1
+tests

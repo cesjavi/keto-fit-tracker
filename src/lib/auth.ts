@@ -3,7 +3,8 @@ import {promisify} from 'node:util';
 import {NextRequest,NextResponse} from 'next/server';
 import {db} from '@/lib/db';
 const scryptAsync=promisify(scrypt);
-export const ADMIN_EMAIL='cesjavi@gmail.com';
+export const DEFAULT_ADMIN_EMAIL='admin@ketofit.app';
+export const ADMIN_EMAIL=(process.env.ADMIN_EMAIL||DEFAULT_ADMIN_EMAIL).trim().toLowerCase();
 export const COOKIE='ketofit_account';
 export const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
 export function sameSecret(a:string,b:string){return timingSafeEqual(Buffer.from(digest(a)),Buffer.from(digest(b)))}

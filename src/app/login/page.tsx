@@ -139,14 +139,15 @@ export default function Login() {
                 {tr("Mínimo 12 caracteres. Podés usar una frase.", "Minimum 12 characters. You can use a passphrase.")}
               </small>
             </label>
-            {mode === "register" && email.trim().toLowerCase() === "cesjavi@gmail.com" && (
+            {mode === "register" &&
+              email.trim().toLowerCase() === (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@ketofit.app").toLowerCase() && (
               <label>
                 {tr("Código de administrador", "Admin code")}
                 <input name="adminCode" type="password" autoComplete="off" maxLength={200} required />
                 <small>
                   {tr(
-                    "Usá la clave privada de la versión anterior. Después ingresarás con tu nueva contraseña.",
-                    "Use the private key from the previous version. Afterward, sign in with your new password."
+                    "Ingresá el código configurado en ACCESS_PASSWORD del servidor.",
+                    "Enter the activation code configured in the server's ACCESS_PASSWORD variable."
                   )}
                 </small>
               </label>

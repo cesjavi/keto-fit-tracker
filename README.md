@@ -1,99 +1,98 @@
 # KetoFit
 
-Aplicación en español para entrenamiento, planificación de comidas y seguimiento personal. Next.js App Router, TypeScript, Tailwind CSS, PostgreSQL y Prisma. Sin Docker.
+Personal training, keto meal planning, and wellness tracking web app (Spanish UI) built with Next.js App Router, TypeScript, Tailwind CSS, PostgreSQL, and Prisma — no Docker required.
 
-## Abrir en el celular
+## Mobile Access (PWA)
 
 **https://keto-fit-tracker-two.vercel.app**
 
-1. Abrí la dirección en Chrome.
-2. Elegí **Crear cuenta**. Ingresá tu nombre, email y una contraseña de al menos 12 caracteres.
-3. Completá la configuración del primer ingreso: medidas, experiencia, objetivo, casa/gimnasio, días, duración y preferencias alimentarias.
-4. Podés generar tu primera semana de comidas al finalizar.
-5. Para instalarla en Android: menú de Chrome → **Agregar a pantalla principal → Instalar**.
+1. Open the URL in Chrome.
+2. Select **Crear cuenta**. Enter your name, email, and a password of at least 12 characters.
+3. Complete the initial onboarding: body measurements, experience level, goal, home/gym mode, training days, session duration, and dietary preferences.
+4. Optionally generate your first weekly meal plan at the end of onboarding.
+5. To install on Android: Chrome menu → **Add to Home screen → Install**.
 
-La interfaz incluye navegación inferior en celular, formularios en una columna y botones táctiles. La PWA requiere conexión para consultar y guardar registros; sin conexión muestra una pantalla informativa.
+The interface features a 4-pillar navigation system with domain sub-tabs, bottom navigation on mobile, tactile stepper controls, an animated splash intro, and a reactive vector mascot (**Paltín**). The PWA requires a network connection to read and save records; offline visits display an informative fallback screen.
 
-## Activar el administrador
+## Activating the Admin Account
 
-La cuenta reservada es **cesjavi@gmail.com**. No tiene una contraseña nueva predefinida: la elegís al registrarte.
+The reserved admin email is **cesjavi@gmail.com**. It has no predefined password — you choose one when registering.
 
-1. En **Crear cuenta**, usá ese email.
-2. Elegí tu nueva contraseña (12–128 caracteres).
-3. En **Código de administrador**, ingresá la clave privada de la primera versión, entregada en `Acceso-KetoFit.txt`.
-4. Al registrarte se vinculan a tu cuenta los datos anteriores de esa base. La configuración inicial te permite confirmarlos o cambiarlos.
+1. Under **Crear cuenta**, enter that email address.
+2. Choose a new password (12–128 characters).
+3. In **Código de administrador**, enter the legacy private key provided in `Acceso-KetoFit.txt`.
+4. Registration links previous records from that database to your account; onboarding lets you confirm or update them.
 
-Ese código solo activa el registro reservado. Después ingresás con email y tu contraseña nueva. Las sesiones anteriores de la aplicación de clave única ya no dan acceso a los datos.
+That code only activates the reserved account. Afterward, sign in with your email and new password. Previous single-password sessions no longer grant access.
 
-El panel **Administración** muestra cuentas registradas, fechas y roles; no muestra el historial de salud, alimentación ni entrenamiento de otros usuarios. Cada cuenta tiene sus registros separados. No hay verificación del email ni recuperación por correo todavía: no se simulan envíos.
+The **Administración** panel lists registered accounts, creation dates, and roles only — it never displays health, nutrition, or workout history of other users. Each account's records are strictly isolated. Email verification and password recovery emails are not yet implemented (no fake emails are simulated).
 
-## Arrancar en esta PC
+## Running Locally on Windows
 
 ```powershell
 cd F:\Sistemas\keto-fit-tracker
 .\iniciar.ps1
 ```
 
-Abrí **http://localhost:3000**. Dejá la terminal abierta; `Ctrl+C` detiene la aplicación.
+Open **http://localhost:3000**. Keep the terminal open; press `Ctrl+C` to stop the app.
 
-Si Windows bloquea el script:
+If Windows execution policy blocks the script:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File F:\Sistemas\keto-fit-tracker\iniciar.ps1
 ```
 
-Para detener también la base:
+To stop the local PostgreSQL instance as well:
 
 ```powershell
 .\detener-base.ps1
 ```
 
-Se usa una instancia PostgreSQL exclusiva en `127.0.0.1:55432`, con datos en `.data\postgres`. Los scripts esperan PostgreSQL en `C:\Program Files\PostgreSQL\18\bin`. No usan las bases de otros sistemas.
+This project uses an isolated PostgreSQL instance on `127.0.0.1:55432` storing data in `.data\postgres`. The PowerShell helper scripts expect PostgreSQL binaries at `C:\Program Files\PostgreSQL\18\bin` and do not touch any other local databases.
 
-Los usuarios y datos locales son independientes de Vercel. Una cuenta registrada en Vercel no aparece automáticamente en la base local. Podés trasladar registros desde **Ajustes y datos → Exportar JSON / Importar copia**. La importación reemplaza solo los datos de la cuenta actual y requiere confirmación.
+Local accounts and data are independent from Vercel production. You can transfer records via **Ajustes y datos → Exportar JSON / Importar copia**. Importing replaces only the current account's data after explicit confirmation.
 
-## Comidas y entrenamiento
+## Training, Nutrition & Customization
 
-- En casa: propuestas sin máquinas, con peso corporal, apoyos estables y caminatas. La cantidad de series tiene en cuenta la experiencia y la semana de descarga.
-- Gimnasio: rutinas con máquinas y pesos libres. Elegís tus días y tiempo disponible.
-- El planificador genera siete días con desayuno, almuerzo, merienda y cena. Podés modificar cada receta y porción.
-- Elegí alimentación variada o vegetariana, tiempo por receta y exclusiones (huevos, lácteos, frutos secos, pescado).
-- La compra se calcula automáticamente sumando ingredientes de la semana elegida.
-- Las recetas muestran macros estimados por porción, no mediciones médicas. Las exclusiones se basan en los ingredientes del catálogo; ante alergias hay que verificar etiquetas y trazas.
-- Generar un menú no registra alimentos consumidos ni determina una meta de calorías. Las metas se configuran manualmente.
-- No se inventan medidas ni historiales. No hay integración con Health Connect.
+- **Home & Gym Modes:** Switch between home bodyweight workouts and gym equipment/free-weight routines at any time. Volume adapts to experience level and the Week 5 deload phase.
+- **Editable Routines & Session Mode:** Customize training days, duration, experience, session titles, and individual exercises per day/mode directly from **Entrenamiento → Editar entrenamiento**. Each exercise displays your last recorded mark inline, pre-fills sets/reps/load, and supports `±` tactile steppers plus full editing in **Historial**.
+- **Keto Nutrition & Editable Logs:** Track daily calories, net/total carbs (ceiling semantics), protein (floor target), and fats with proportional progress bars. Edit any logged food entry or update dietary preferences and daily targets directly from **Alimentación → Cambiar alimentación**.
+- **Weekly Meal Planner & Live Macros:** Plan 7 days across breakfast, lunch, snack, and dinner with live per-day calorie, carb, and protein totals. Choose omnivore keto or vegetarian, max prep time, servings, and exclusions (eggs, dairy, nuts, fish).
+- **Automated Shopping List:** Aggregates all ingredients for the selected week automatically with an action-first checklist and progress bar.
+- **Disclaimers:** Recipe macros are per-serving estimates, not clinical measurements. Exclusions rely on catalog ingredients; verify labels and cross-contamination for allergies. Generating a meal plan neither logs consumed food nor sets calorie targets automatically. No measurements or histories are fabricated, and there is no Health Connect integration.
 
-## Groq y Fireworks
+## AI Meal Suggestions (Groq & Fireworks)
 
-En **Planificador → Una propuesta con inteligencia artificial**, elegí el proveedor y autorizá el envío antes de generar. El resultado es una vista previa: tenés que aplicarla para reemplazar esa semana.
+In **Alimentación → Planificador → Asistente semanal**, choose a provider and explicitly authorize sending preferences before generating. Results appear as a preview and only overwrite the selected week once applied.
 
-Groq está configurado en producción con la clave provista por el propietario. Fireworks está integrado como alternativa, pero requiere configurar su clave y modelo para habilitarlo. No hay claves en el código ni en el navegador.
+Groq is configured in production with the owner's server-side key. Fireworks is integrated as an optional fallback once its API key and model are configured. No keys are exposed in client code or the browser.
 
-Solo se envían preferencias de alimentación, exclusiones, tiempo, porciones y catálogo de recetas. No se envían email, peso, cintura ni historial. El servidor valida las recetas devueltas antes de mostrarlas y rechaza respuestas incompatibles.
+Only dietary preferences, exclusions, prep time, servings, and the recipe catalog are sent — never email, weight, waist, or personal history. The server validates every returned recipe against constraints before displaying it.
 
-El modo **Automático** puede usar Groq y Fireworks configurados, en ese orden, ante límites temporales o fallos del proveedor. La autorización de la pantalla indica ambos destinos. No se usa un proveedor sin configurar ni se inventa una respuesta de IA. El generador sin IA sigue disponible.
+**Auto** mode falls back across configured providers (Groq, then Fireworks) on rate limits or transient errors. The on-screen consent notice names both destinations. The deterministic non-AI generator remains available at all times.
 
-Variables del servidor en Vercel:
+Server environment variables in Vercel:
 
-| Variable | Uso |
+| Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | PostgreSQL Neon con SSL |
-| `ACCESS_PASSWORD` | Código reservado para activar al administrador |
-| `GROQ_API_KEY` | Clave secreta de Groq |
-| `GROQ_MODEL` | ID del modelo habilitado en tu cuenta |
-| `FIREWORKS_API_KEY` | Clave secreta de Fireworks, cuando quieras habilitarlo |
-| `FIREWORKS_MODEL` | ID del modelo de Fireworks |
-| `AI_ENABLED` | `true` para habilitar generación con IA |
-| `AI_DAILY_LIMIT` | Opcional; 5 solicitudes diarias por cuenta de forma predeterminada, máximo 20 |
-| `AI_GLOBAL_DAILY_LIMIT` | Opcional; 30 solicitudes diarias totales de forma predeterminada, máximo 500 |
+| `DATABASE_URL` | Neon PostgreSQL connection string with SSL |
+| `ACCESS_PASSWORD` | Reserved activation code for the admin account |
+| `GROQ_API_KEY` | Secret Groq API key |
+| `GROQ_MODEL` | Enabled Groq model ID |
+| `FIREWORKS_API_KEY` | Optional secret Fireworks API key |
+| `FIREWORKS_MODEL` | Fireworks model ID |
+| `AI_ENABLED` | Set to `true` to enable AI generation |
+| `AI_DAILY_LIMIT` | Optional; defaults to 5 requests/day per account (max 20) |
+| `AI_GLOBAL_DAILY_LIMIT` | Optional; defaults to 30 total requests/day (max 500) |
+| `OPEN_METEO_API_KEY` | Optional commercial Open-Meteo API key |
 
-Cada solicitud de IA puede consumir crédito del proveedor. Un intento fallido también cuenta para el límite de solicitudes de la app; este límite no sustituye los límites de gasto del proveedor. Las claves deben guardarse como secretos del entorno, sin prefijo `NEXT_PUBLIC_`. Cambiar variables requiere un nuevo despliegue.
+Each AI request may consume provider credits. Failed attempts also count toward the app's daily limit, which does not replace provider spending caps. Store all secrets without the `NEXT_PUBLIC_` prefix; changing variables requires a redeploy.
 
-Referencias de las APIs: [Groq](https://console.groq.com/docs/api-reference) y [Fireworks](https://fireworksai.readme.io/reference/createchatcompletion).
+API docs: [Groq](https://console.groq.com/docs/api-reference) and [Fireworks](https://fireworksai.readme.io/reference/createchatcompletion).
 
-## Desarrollo y publicación
+## Development & Deployment
 
-Requisitos: Node.js 20.9 o superior (se usó Node 24), npm y PostgreSQL. La configuración local está en `.env`, excluido de Git.
+Requirements: Node.js 20.9+ (developed on Node 24), npm, and PostgreSQL. Local settings live in `.env` (git-ignored).
 
 ```powershell
 npm install
@@ -102,74 +101,61 @@ npx prisma migrate deploy
 npm run dev
 ```
 
-Para compilar y arrancar:
+Build and run production server locally:
 
 ```powershell
 npm run build
 npm start
 ```
 
-Para actualizar Vercel:
+Run tests:
 
 ```powershell
-vercel deploy --prod --yes
+npm test
 ```
 
-El build de Vercel genera Prisma, aplica migraciones y compila Next.js. No ejecuta tests. El proyecto es `cesjavis-projects/keto-fit-tracker`, con PostgreSQL Neon `ketofit-db`.
+Deploy to Vercel production:
 
-No publiques `.env*`, `.data`, claves, copias personales, `node_modules` o `.vercel`. `.vercelignore` excluye los archivos locales sensibles del despliegue.
+```powershell
+vercel deploy --prod --yes --scope cesjavis-projects
+```
 
-## Problemas frecuentes
+The Vercel build runs Prisma generation, deploys pending migrations, and builds Next.js (tests are not executed during the Vercel build). Project: `cesjavis-projects/keto-fit-tracker` backed by Neon PostgreSQL `ketofit-db`.
 
-- **Veo la pantalla de clave única:** recargá la URL publicada. La versión actual muestra **Iniciar sesión** y **Crear cuenta**. Si instalaste la PWA, cerrala y volvé a abrirla con conexión.
-- **No puedo activar el administrador:** usá `cesjavi@gmail.com`, una contraseña nueva de 12 caracteres o más y la clave anterior como código de administrador.
-- **PostgreSQL no disponible:** iniciá la base con `iniciar.ps1` y consultá `.data\postgres.log`.
-- **Cambios en otra pestaña:** recargá antes de volver a guardar; se usa una revisión para evitar sobrescrituras silenciosas.
-- **Puerto 3000 ocupado:** `npm start -- --port 3002`.
-- **Fireworks sin configurar:** agregá clave y modelo en el entorno de Vercel y volvé a desplegar.
-- **No aparecen fotos:** las fotografías ilustrativas de Unsplash necesitan conexión.
+Never commit or publish `.env*`, `.data`, secret keys, personal backups, `node_modules`, or `.vercel`. `.vercelignore` excludes sensitive local files from deployments.
 
-Para cerrar sesión usá **Ajustes y datos → Cerrar sesión**; se revoca la sesión en la base.
+## Troubleshooting
 
+- **Legacy single-password screen still visible:** Reload the published URL. If installed as a PWA, close and reopen it online to refresh cached assets.
+- **Cannot activate admin account:** Use `cesjavi@gmail.com`, a new password (12+ chars), and the previous private key as the admin code.
+- **PostgreSQL unavailable:** Start the local database with `.\iniciar.ps1` and check `.data\postgres.log`.
+- **Changes made in another tab:** Reload before saving again; optimistic concurrency uses a server-side `revision` counter to prevent silent overwrites.
+- **Port 3000 in use:** Run `npm start -- --port 3002`.
+- **Fireworks not configured:** Add `FIREWORKS_API_KEY` and `FIREWORKS_MODEL` in Vercel environment variables and redeploy.
+- **Recipe photos missing:** Illustrative Unsplash images require an internet connection.
 
-## Comprar en Coto, Carrefour y Día
+Sign out via **Ajustes y datos → Cerrar sesión** to revoke the session in PostgreSQL.
 
-En **Lista de compras**, elegí el supermercado y usá **Abrir** para ir a su tienda online. **Copiar ingrediente** copia el nombre para pegar en el buscador; **Copiar pendientes** copia cantidades e ingredientes que todavía no marcaste. También podés descargar la lista completa.
+## Supermarkets by City & Groq Suggestions
 
-La selección de supermercado se recuerda en ese navegador. No se envía tu dirección ni tus datos de KetoFit al abrir la tienda. Ingresá tu dirección de entrega directamente en la web del súper para consultar cobertura y disponibilidad. Los botones abren las páginas oficiales; no crean carritos, no comparan precios ni realizan pagos. La compra se completa en cada supermercado.
+In **Alimentación → Compras → Configurar ciudad**, save country, province/region, city, preferred stores, and custom HTTPS stores in your account (up to 20 locations, included in JSON backups; no GPS or street address requested).
 
+**Sugerir para esta ciudad** calls Groq only after explicit consent to send country, region, and city (no health or identity data). Suggestions are constrained to the known store catalog (currently preloaded for Argentina; other countries can add custom HTTPS stores manually). Links are never AI-generated, and Groq does not verify live branches, pricing, stock, or delivery coverage. Store actions open official websites directly without creating carts or processing payments.
 
-## Historial consultable de ejercicios
+## Queryable Workout History
 
-En **Entrenamiento**, cada ejercicio tiene **Consultar historial**. La sección permite filtrar por ejercicio, nombre, fechas y semana del programa, ordenar por fecha o carga, abrir detalles y exportar la consulta como CSV. Al elegir un ejercicio se muestran el último registro y las cargas externas registradas, con un gráfico para ejercicios de fuerza. Se muestran 15 registros por página. Las mediciones existentes se conservan sin cambios; no se inventan resultados ni se reconstruyen entrenamientos no registrados.
+In **Entrenamiento → Historial**, filter records by exercise, name search, date range, and program week; sort by date or load; inspect details; edit existing entries; and export filtered results to CSV (15 items per page). Selecting a strength exercise displays latest mark, peak load, and a load-progression chart. Existing records are never altered automatically or fabricated.
 
+## UV Index with Device Location
 
-## Supermercados por ciudad y sugerencias de Groq
+Open **Cuerpo y entorno → Sol y Vit. D**, authorize sending approximate coordinates, and tap **Usar mi ubicación** (requires HTTPS or localhost and browser geolocation permission). Coordinates are rounded to two decimal places before querying Open-Meteo, held only in screen memory, never saved to your profile or JSON exports, and never sent to Groq. Tapping **Dejar de usar ubicación** clears the session query immediately.
 
-En **Lista de compras → Configurar ciudad** guardás país, provincia o región, ciudad, supermercados y preferido en tu cuenta. Podés conservar hasta 20 ubicaciones, cambiar la activa y agregar tiendas propias mediante URLs HTTPS. Las configuraciones se incluyen en las copias JSON. Las cuentas existentes reciben una configuración vacía sin perder datos. No se solicita GPS ni dirección exacta.
+Displays the latest hourly UV estimate, today/tomorrow forecast chart, WHO UV ≥ 3 sun-protection guidance, and future lower-UV daylight windows. Data comes from Open-Meteo weather models (hourly means of the preceding hour), refreshes every 15 minutes while visible, flags data older than 30 minutes as stale, and is rate-limited to 30 requests/hour per account (separate from Groq quota).
 
-**Sugerir para esta ciudad** usa Groq solo después de autorizar el envío de país, región y ciudad. No se envían datos de salud ni identidad. Las sugerencias se limitan al catálogo de cadenas con sitios conocidos; el catálogo precargado actual es de Argentina. Para otros países se agregan tiendas manualmente. Los enlaces no se generan con IA. Groq estima relevancia a partir de conocimiento general: no consulta mapas, sucursales, precios, stock ni cobertura de entrega. Las sugerencias deben agregarse y guardarse manualmente, y la cobertura se verifica en la tienda. Cada consulta comparte el límite diario de IA con el generador de comidas. No se genera un carrito ni se paga desde KetoFit.
+Sources: https://open-meteo.com/en/docs and https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation.
 
+## Vitamin D Exploratory Model & 25(OH)D Lab Log
 
-## Índice UV con ubicación del celular
+Based on D-Minder documentation (https://dminder.info/science) and the published equation 13 in *Scientific Reports* (https://www.nature.com/articles/s41598-024-54188-5), the **Sol y Vit. D** view includes a transparent educational calculator with a one-click bridge to import the currently queried UV index, plus a separate lab log strictly for real 25(OH)D blood test results (`1 ng/mL = 2.5 nmol/L`, NIH: https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/).
 
-Abrí **Índice UV** desde el menú (en celular: **Más**) o el acceso del Dashboard. Tocá **Usar mi ubicación** y autorizá el permiso del navegador. Requiere HTTPS (Vercel) o localhost, y ubicación activada en el dispositivo. Usa una consulta puntual, no rastreo continuo. La ubicación puede provenir de GPS, Wi-Fi o red celular.
-
-Las coordenadas se redondean a dos decimales antes de enviarlas al servidor y a Open-Meteo. No se guardan en el perfil ni en copias JSON y no se envían a Groq. Permanecen en memoria de esta pantalla; **Dejar de usar ubicación** borra la consulta de la pantalla. Al volver a entrar hay que consultar la ubicación nuevamente.
-
-El servicio muestra la última estimación horaria de UV, su franja y la hora de consulta, el pronóstico de hoy y mañana, clasificación UV y franjas futuras con luz de menor radiación. Los valores proceden de modelos meteorológicos de Open-Meteo: no son un sensor del teléfono ni una medición local en tiempo real. Cada valor horario representa la media de la hora anterior según la documentación del proveedor. El pronóstico se consulta al obtener la ubicación y cada 15 minutos mientras la pantalla sigue visible; también puede actualizarse manualmente. Se marca la información de más de 30 minutos como desactualizada. Sin respuesta del proveedor no se muestran valores inventados.
-
-El visor excluye las horas nocturnas al comparar franjas con luz. Los horarios de menor UV no garantizan seguridad para broncearse; no calcula minutos seguros ni dosis de vitamina D. Incluye la recomendación de protección desde UV 3 de la OMS y enlaces a las fuentes.
-
-La API requiere sesión y limita 30 consultas por cuenta y hora. No consume el cupo de Groq. Por defecto usa la API pública de Open-Meteo, sujeta a sus condiciones de uso y disponibilidad. Si se contrata el servicio comercial, se puede configurar `OPEN_METEO_API_KEY` como secreto de Vercel para usar el endpoint customer. No hace falta agregar claves al navegador.
-
-Fuentes: https://open-meteo.com/en/docs y https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation.
-
-
-## Vitamina D: investigación y modelo orientativo
-
-Se revisó la documentación de D-Minder (https://dminder.info/science), que describe variables adicionales al UV y tiempo, sin reutilizar su código o afirmar equivalencia con su motor. En **Índice UV** se agregó una calculadora educativa con fórmula publicada (https://www.nature.com/articles/s41598-024-54188-5, ecuación 13), supuestos y limitaciones visibles. No se infiere producción personal real ni se pronostica corrección de deficiencia.
-
-El modelo expresa UI teóricas como `21120 * (UVI * segundos / 40) * fracción de piel / MED`. Se limita aquí la extrapolación a escenarios de hasta ¼ de la MED nominal; no es un criterio de exposición segura. Los valores nominales MED se identifican como aproximaciones de referencia, no mediciones personales. No se recomienda una duración, una meta de UI ni dosis de suplementos. No reproduce el algoritmo de D-Minder ni incorpora ozono o calibración farmacocinética.
-
-El registro de análisis permite ingresar exclusivamente resultados reales de 25(OH)D, con fecha, valor y unidad nmol/L o ng/mL. La conversión utilizada es 1 ng/mL = 2,5 nmol/L (NIH: https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/). No se diagnostican ni se generan valores sanguíneos. Los análisis se guardan por cuenta y se incluyen en exportación/importación JSON; las cuentas y copias anteriores reciben una lista vacía. Estos datos no se envían a servicios de IA ni al proveedor meteorológico.
+The theoretical formula `21120 * (UVI * seconds / 40) * skin_fraction / MED` is capped at ¼ nominal MED as a low-dose exploration only. It does not recommend exposure times, supplement doses, or target IU, nor does it predict blood 25(OH)D correction. Lab records are saved per account, included in JSON backups, and never sent to AI or weather APIs.

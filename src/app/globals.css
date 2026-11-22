@@ -658,7 +658,8 @@ textarea:focus {
   gap: 10px;
 }
 
-.today-command .cmd-primary {
+.today-command .cmd-primary,
+.pitch-shell .cmd-primary {
   background: #e5efce;
   color: #183526;
   display: inline-flex;

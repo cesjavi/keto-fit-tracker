@@ -108,8 +108,8 @@ export default function Tracker() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [search, setSearch] = useState("");
   const [day, setDay] = useState(0);
-  const [sessionDate, setSessionDate] = useState(() => dateStr());
-  const [planWeek, setPlanWeek] = useState(monday());
+  const [sessionDate, setSessionDate] = useState("");
+  const [planWeek, setPlanWeek] = useState("");
   const [plannerDrawer, setPlannerDrawer] = useState(false);
   const [trainingDrawer, setTrainingDrawer] = useState(false);
   const [foodDrawer, setFoodDrawer] = useState(false);
@@ -165,7 +165,10 @@ export default function Tracker() {
       .catch((e) => setError(e.message));
 
     setDark(localStorage.getItem("ketofit-theme") === "dark");
-    setNow(Date.now());
+    const initNow = Date.now();
+    setNow(initNow);
+    setSessionDate((prev) => prev || dateStr(new Date(initNow)));
+    setPlanWeek((prev) => prev || monday(new Date(initNow)));
     const t = setInterval(() => setNow(Date.now()), 1000);
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
     const fn = (e: Event) => {
@@ -257,7 +260,9 @@ export default function Tracker() {
     () => training(data.preferences, data.customRoutines),
     [data.preferences, data.customRoutines]
   );
-  const today = dateStr();
+  const today = useMemo(() => (now ? dateStr(new Date(now)) : dateStr()), [now]);
+  const activeSessionDate = sessionDate || today;
+  const activePlanWeek = planWeek || monday();
   const todayWeekday = useMemo(() => ((now ? new Date(now) : new Date()).getDay() + 6) % 7, [now]);
   const todayRoutineIdx = data.preferences.trainingDays.indexOf(todayWeekday);
   const isRestDay = todayRoutineIdx === -1;
@@ -308,10 +313,10 @@ export default function Tracker() {
     .map((n) => String(n).padStart(2, "0"))
     .join(":");
 
-  const shoppingItems = useMemo(() => shopping(data.plan, planWeek + "|"), [data.plan, planWeek]);
+  const shoppingItems = useMemo(() => shopping(data.plan, activePlanWeek + "|"), [data.plan, activePlanWeek]);
   const pendingShoppingCount = useMemo(
-    () => shoppingItems.filter((item) => !data.checked.includes(`${planWeek}|${item.name}|${item.unit}`)).length,
-    [shoppingItems, data.checked, planWeek]
+    () => shoppingItems.filter((item) => !data.checked.includes(`${activePlanWeek}|${item.name}|${item.unit}`)).length,
+    [shoppingItems, data.checked, activePlanWeek]
   );
 
   // Latest workout record per exercise for inline memory in Session Mode
@@ -325,8 +330,8 @@ export default function Tracker() {
   }, [data.workouts]);
 
   const sessionWorkouts = useMemo(
-    () => data.workouts.filter((w) => w.date === sessionDate),
-    [data.workouts, sessionDate]
+    () => data.workouts.filter((w) => w.date === activeSessionDate),
+    [data.workouts, activeSessionDate]
   );
 
   const completedInSession = useMemo(() => {
@@ -492,7 +497,7 @@ export default function Tracker() {
           ctaAction: () =>
             download(
               shoppingItems.map((i) => `${fmt(i.qty)} ${i.unit} ${i.name}`).join("\n"),
-              `shopping-${planWeek}.txt`,
+              `shopping-${activePlanWeek}.txt`,
               "text/plain;charset=utf-8"
             ),
         };
@@ -591,7 +596,7 @@ export default function Tracker() {
           `ketofit-${today}.json`
         ),
     };
-  }, [pillar, trainSub, foodSub, bodySub, data, planWeek, shoppingItems, today, tr, fmt, phaseLabel]);
+  }, [pillar, trainSub, foodSub, bodySub, data, activePlanWeek, shoppingItems, today, tr, fmt, phaseLabel]);
 
   if (loaded && !data.preferences.onboardingComplete) {
     return <Onboarding data={data} busy={syncing} error={error} onSave={save} name={account?.name ?? ""} />;
@@ -1023,7 +1028,7 @@ export default function Tracker() {
                     icon={<ShoppingBasket size={18} />}
                     note={
                       shoppingItems.length
-                        ? `${tr("Semana del", "Week of")} ${shortDate(planWeek)}`
+                        ? `${tr("Semana del", "Week of")} ${shortDate(activePlanWeek)}`
                         : tr("Generá un plan semanal", "Create a weekly plan")
                     }
                   />
@@ -1162,7 +1167,7 @@ export default function Tracker() {
                     <div className="session-bar-meta">
                       <span className="session-progress-pill tabular">
                         <Check size={14} /> {completedInSession} {tr("de", "of")} {activeRoutine.ex.length}{" "}
-                        {tr("registrados el", "logged on")} {shortDate(sessionDate)}
+                        {tr("registrados el", "logged on")} {shortDate(activeSessionDate)}
                       </span>
                       <span className="small muted">
                         {data.preferences.gym
@@ -1181,7 +1186,7 @@ export default function Tracker() {
                       <input
                         aria-label={tr("Fecha de la sesión", "Session date")}
                         type="date"
-                        value={sessionDate}
+                        value={activeSessionDate}
                         onChange={(e) => {
                           if (e.target.value) setSessionDate(e.target.value);
                         }}
@@ -1197,7 +1202,7 @@ export default function Tracker() {
                       const historyCount = data.workouts.filter((w) => w.exercise === ex).length;
                       return (
                         <ExerciseCard
-                          key={`${activeRoutine.day}-${ex}-${lastMark?.id ?? "none"}`}
+                          key={`${activeRoutine.mode}-${activeRoutine.dayIndex}-${ex}`}
                           index={i + 1}
                           exercise={ex}
                           guide={guide}
@@ -1216,7 +1221,7 @@ export default function Tracker() {
                                   ...data.workouts,
                                   {
                                     id: uid(),
-                                    date: sessionDate,
+                                    date: activeSessionDate,
                                     exercise: ex,
                                     sets,
                                     reps,
@@ -1460,6 +1465,7 @@ export default function Tracker() {
                     )}
                   </p>
                   <form
+                    key={`${data.targets.kcal}-${data.targets.protein}-${data.targets.fat}-${data.targets.carbs}`}
                     className="form-grid"
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -1527,7 +1533,7 @@ export default function Tracker() {
                   {tr("Semana del lunes", "Week starting Monday")}
                   <input
                     type="date"
-                    value={planWeek}
+                    value={activePlanWeek}
                     onChange={(e) => {
                       if (e.target.value) setPlanWeek(monday(new Date(e.target.value + "T12:00:00")));
                     }}
@@ -1548,8 +1554,8 @@ export default function Tracker() {
                 ) : (
                   <p className="muted">
                     {tr(
-                      `Calculada automáticamente desde tu Planificador para la semana del ${planWeek}.`,
-                      `Automatically calculated from your Planner for the week of ${planWeek}.`
+                      `Calculada automáticamente desde tu Planificador para la semana del ${activePlanWeek}.`,
+                      `Automatically calculated from your Planner for the week of ${activePlanWeek}.`
                     )}
                   </p>
                 )}
@@ -1561,7 +1567,7 @@ export default function Tracker() {
                 {days.map((d, i) => {
                   const dayTotals = meals.reduce(
                     (acc, m) => {
-                      const item = data.plan[`${planWeek}|${i}|${m}`];
+                      const item = data.plan[`${activePlanWeek}|${i}|${m}`];
                       if (!item) return acc;
                       const rec = recipes.find((r) => r.id === item.recipe);
                       if (!rec) return acc;
@@ -1586,7 +1592,7 @@ export default function Tracker() {
                       </div>
 
                       {meals.map((m) => {
-                        const key = `${planWeek}|${i}|${m}`;
+                        const key = `${activePlanWeek}|${i}|${m}`;
                         const item = data.plan[key];
                         return (
                           <div className="meal-slot" key={m}>
@@ -1657,7 +1663,7 @@ export default function Tracker() {
                   config={data.shopping}
                   onConfigSave={(s) => save({ ...data, shopping: s }, { toast: tr("Tiendas guardadas.", "Stores saved.") })}
                   items={shoppingItems}
-                  week={planWeek}
+                  week={activePlanWeek}
                   checked={data.checked}
                   onToggle={(key) =>
                     save({
@@ -1952,6 +1958,7 @@ export default function Tracker() {
                 <section className="card">
                   <h2>{tr("Tu punto de partida", "Your starting point")}</h2>
                   <form
+                    key={`${data.profile.weight}-${data.profile.height}-${data.profile.bmr}-${data.profile.goal}-${data.profile.experience}`}
                     className="form-grid"
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -2354,7 +2361,7 @@ export default function Tracker() {
               <div>
                 <span className="eyebrow">{tr("ASISTENTE SEMANAL", "WEEKLY ASSISTANT")}</span>
                 <h2>
-                  {tr("Generar semana del", "Generate week of")} {planWeek}
+                  {tr("Generar semana del", "Generate week of")} {activePlanWeek}
                 </h2>
               </div>
               <button
@@ -2368,12 +2375,15 @@ export default function Tracker() {
             </div>
             <div className="drawer-body">
               <MealGenerator
-                key={planWeek}
+                key={activePlanWeek}
                 data={data}
-                week={planWeek}
+                week={activePlanWeek}
                 onSave={(next) =>
                   save(next, {
-                    toast: tr(`Plan aplicado a la semana del ${planWeek}.`, `Plan applied to week of ${planWeek}.`),
+                    toast: tr(
+                      `Plan aplicado a la semana del ${activePlanWeek}.`,
+                      `Plan applied to week of ${activePlanWeek}.`
+                    ),
                   })
                 }
                 onApplied={() => setPlannerDrawer(false)}
@@ -2693,15 +2703,23 @@ function ExerciseCard({
 }) {
   const { tr, fmt, shortDate, exerciseName, lang } = useI18n();
   const isTimed = timed(exercise);
-  const [sets, setSets] = useState(lastMark?.sets ?? guide.sets);
-  const [reps, setReps] = useState(lastMark?.reps ?? guide.reps);
-  const [load, setLoad] = useState(lastMark?.load ?? 0);
+  const [setsStr, setSetsStr] = useState(() => String(lastMark?.sets ?? guide.sets));
+  const [repsStr, setRepsStr] = useState(() => String(lastMark?.reps ?? guide.reps));
+  const [loadStr, setLoadStr] = useState(() => String(lastMark?.load ?? 0));
 
   const doneToday = loggedToday.length > 0;
   const latestToday = loggedToday.at(-1);
   const displayEx = exerciseName(exercise);
 
   const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+  const parseIntClamped = (s: string, min: number, max: number, fallback: number) => {
+    const n = Number(s);
+    return Number.isFinite(n) && s.trim() !== "" ? clamp(Math.round(n), min, max) : fallback;
+  };
+  const parseLoadClamped = (s: string) => {
+    const n = Number(s);
+    return Number.isFinite(n) && s.trim() !== "" ? clamp(Math.round(n * 10) / 10, 0, 1000) : 0;
+  };
 
   const guideText =
     lang === "en"
@@ -2736,9 +2754,9 @@ function ExerciseCard({
                 type="button"
                 className="last-mark-chip"
                 onClick={() => {
-                  setSets(lastMark.sets);
-                  setReps(lastMark.reps);
-                  setLoad(lastMark.load);
+                  setSetsStr(String(lastMark.sets));
+                  setRepsStr(String(lastMark.reps));
+                  setLoadStr(String(lastMark.load));
                 }}
               >
                 <RotateCcw size={13} />
@@ -2762,7 +2780,13 @@ function ExerciseCard({
         className="exercise-controls"
         onSubmit={(e) => {
           e.preventDefault();
-          onLog(sets, reps, load);
+          const finalSets = parseIntClamped(setsStr, 1, 20, guide.sets);
+          const finalReps = parseIntClamped(repsStr, 1, 100, guide.reps);
+          const finalLoad = parseLoadClamped(loadStr);
+          setSetsStr(String(finalSets));
+          setRepsStr(String(finalReps));
+          setLoadStr(String(finalLoad));
+          onLog(finalSets, finalReps, finalLoad);
         }}
       >
         <div className="stepper-field">
@@ -2771,7 +2795,7 @@ function ExerciseCard({
             <button
               type="button"
               aria-label={`${tr("Restar series de", "Decrease sets for")} ${displayEx}`}
-              onClick={() => setSets((v) => clamp(v - 1, 1, 20))}
+              onClick={() => setSetsStr(String(clamp(parseIntClamped(setsStr, 1, 20, guide.sets) - 1, 1, 20)))}
             >
               −
             </button>
@@ -2780,14 +2804,15 @@ function ExerciseCard({
               type="number"
               min={1}
               max={20}
-              value={sets}
-              onChange={(e) => setSets(clamp(Number(e.target.value) || 1, 1, 20))}
+              value={setsStr}
+              onChange={(e) => setSetsStr(e.target.value)}
+              onBlur={() => setSetsStr(String(parseIntClamped(setsStr, 1, 20, guide.sets)))}
               required
             />
             <button
               type="button"
               aria-label={`${tr("Sumar series de", "Increase sets for")} ${displayEx}`}
-              onClick={() => setSets((v) => clamp(v + 1, 1, 20))}
+              onClick={() => setSetsStr(String(clamp(parseIntClamped(setsStr, 1, 20, guide.sets) + 1, 1, 20)))}
             >
               +
             </button>
@@ -2800,7 +2825,7 @@ function ExerciseCard({
             <button
               type="button"
               aria-label={`${tr("Restar", "Decrease")} ${isTimed ? tr("minutos", "minutes") : "reps"} ${displayEx}`}
-              onClick={() => setReps((v) => clamp(v - 1, 1, 100))}
+              onClick={() => setRepsStr(String(clamp(parseIntClamped(repsStr, 1, 100, guide.reps) - 1, 1, 100)))}
             >
               −
             </button>
@@ -2809,14 +2834,15 @@ function ExerciseCard({
               type="number"
               min={1}
               max={100}
-              value={reps}
-              onChange={(e) => setReps(clamp(Number(e.target.value) || 1, 1, 100))}
+              value={repsStr}
+              onChange={(e) => setRepsStr(e.target.value)}
+              onBlur={() => setRepsStr(String(parseIntClamped(repsStr, 1, 100, guide.reps)))}
               required
             />
             <button
               type="button"
               aria-label={`${tr("Sumar", "Increase")} ${isTimed ? tr("minutos", "minutes") : "reps"} ${displayEx}`}
-              onClick={() => setReps((v) => clamp(v + 1, 1, 100))}
+              onClick={() => setRepsStr(String(clamp(parseIntClamped(repsStr, 1, 100, guide.reps) + 1, 1, 100)))}
             >
               +
             </button>
@@ -2829,7 +2855,7 @@ function ExerciseCard({
             <button
               type="button"
               aria-label={`${tr("Restar 2,5 kg a", "Decrease 2.5 kg for")} ${displayEx}`}
-              onClick={() => setLoad((v) => clamp(Math.round((v - 2.5) * 10) / 10, 0, 1000))}
+              onClick={() => setLoadStr(String(clamp(Math.round((parseLoadClamped(loadStr) - 2.5) * 10) / 10, 0, 1000)))}
             >
               −
             </button>
@@ -2839,14 +2865,15 @@ function ExerciseCard({
               step="0.5"
               min={0}
               max={1000}
-              value={load}
-              onChange={(e) => setLoad(clamp(Number(e.target.value) || 0, 0, 1000))}
+              value={loadStr}
+              onChange={(e) => setLoadStr(e.target.value)}
+              onBlur={() => setLoadStr(String(parseLoadClamped(loadStr)))}
               required
             />
             <button
               type="button"
               aria-label={`${tr("Sumar 2,5 kg a", "Increase 2.5 kg for")} ${displayEx}`}
-              onClick={() => setLoad((v) => clamp(Math.round((v + 2.5) * 10) / 10, 0, 1000))}
+              onClick={() => setLoadStr(String(clamp(Math.round((parseLoadClamped(loadStr) + 2.5) * 10) / 10, 0, 1000)))}
             >
               +
             </button>

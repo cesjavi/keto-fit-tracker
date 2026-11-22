@@ -21,7 +21,7 @@ export async function POST(req:NextRequest){
    return startSession(user.id);
   }
   if(!name)return NextResponse.json({error:'Ingresá tu nombre.'},{status:400});
-  if(email===ADMIN_EMAIL&&(!process.env.ACCESS_PASSWORD||!adminCode||!sameSecret(adminCode,process.env.ACCESS_PASSWORD)))return NextResponse.json({error:'Para activar el administrador, ingresá la clave privada anterior en Código de administrador.'},{status:403});
+  if(email===ADMIN_EMAIL&&(!process.env.ACCESS_PASSWORD||!adminCode||!sameSecret(adminCode,process.env.ACCESS_PASSWORD)))return NextResponse.json({error:'Para activar el administrador, ingresá el código configurado en ACCESS_PASSWORD.'},{status:403});
   const passwordHash=await hashPassword(password);
   const user=await db.$transaction(async tx=>{
    const user=await tx.user.create({data:{email,name,passwordHash,role:email===ADMIN_EMAIL?'ADMIN':'USER'}});

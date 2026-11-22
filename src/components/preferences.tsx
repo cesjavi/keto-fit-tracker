@@ -75,16 +75,29 @@ export function TrainingConfigEditor({
   const [newExercise, setNewExercise] = useState("");
   const [routineDirty, setRoutineDirty] = useState(false);
 
-  useEffect(() => {
-    const nextList = training({ ...data.preferences, gym, trainingDays, minutes }, data.customRoutines);
-    const match = nextList.find((r) => r.dayIndex === editDayIdx) ?? nextList[0];
+  const loadDayRoutine = (targetGym: boolean, targetDay: number, daysList: number[]) => {
+    const nextList = training({ ...data.preferences, gym: targetGym, trainingDays: daysList, minutes }, data.customRoutines);
+    const match = nextList.find((r) => r.dayIndex === targetDay) ?? nextList[0];
     if (match) {
       setEditDayIdx(match.dayIndex);
       setRoutineName(match.name);
       setExercises(match.ex);
       setRoutineDirty(false);
     }
-  }, [gym, editDayIdx, data.customRoutines, data.preferences, minutes, trainingDays]);
+  };
+
+  useEffect(() => {
+    if (!trainingDays.length) return;
+    if (!trainingDays.includes(editDayIdx)) {
+      loadDayRoutine(gym, trainingDays[0], trainingDays);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trainingDays]);
+
+  useEffect(() => {
+    loadDayRoutine(gym, editDayIdx, trainingDays);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gym, editDayIdx, data.customRoutines]);
 
   const routineKey = `${mode}-${editDayIdx}`;
   const hasCustomOverride = Boolean(data.customRoutines[routineKey]);
